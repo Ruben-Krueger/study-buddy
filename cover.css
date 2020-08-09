@@ -13,6 +13,10 @@ a:hover {
   visibility: hidden;
 }
 
+#meme {
+  height: 400px;
+}
+
 /* Custom default button */
 .btn-secondary,
 .btn-secondary:hover,
@@ -31,13 +35,9 @@ a:hover {
 html,
 body {
   height: 100%;
-  background-color: #333;
-}
-
-body {
-  display: -ms-flexbox;
+  /* display: -ms-flexbox;
   display: -webkit-box;
-  display: flex;
+  display: flex; */
   -ms-flex-pack: center;
   -webkit-box-pack: center;
   justify-content: center;
@@ -47,6 +47,7 @@ body {
   background-image: linear-gradient(to right top, #1e8ac9, #7ba3d8, #b1bfe5, #dcddf1, #ffffff);
 
 }
+
 
 .cover-container {
   max-width: 42em;
