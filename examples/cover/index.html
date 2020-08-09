@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
+
+    <title>Study Buddy</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/4.0/examples/cover/">
+
+    <link href="https://getbootstrap.com/docs/4.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS" crossorigin="anonymous">
+
+    <link href="cover.css" rel="stylesheet">
+  </head>
+
+  <body class="text-center">
+
+    <div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+      <header class="masthead mb-auto">
+        <div class="inner">
+          <h1 class="masthead-brand">Study Buddy</h3>
+         
+        </div>
+      </header>
+
+      <div id="meme-box">
+        <h2 id="title"></h2>
+        <img id="meme">
+        <!-- <div class="spinner-grow text-light" role="status">
+          <span class="sr-only">Loading...</span>
+        </div> -->
+      </div>
+
+      <main role="main" class="inner cover">
+        <h1 id="timer"></h1>
+
+
+        <h1 class="cover-heading" id="status">Not started</h1>
+        <p class="lead" id="msg">Study now, memes later.</p>
+        <p class="lead">
+          <a href="#" class="btn btn-lg btn-secondary" onclick="update()" id="btn">Study</a>
+        </p>
+
+
+
+      <div class="container" id="options">
+        <div class="row">
+            <div class="col-6">
+            <h3>Study interval</h3>
+            <div>
+              <label for="exampleInputEmail1">Minutes</label>
+              <input type="number" class="form-control" id="study-minutes" value="55">
+            </div>
+  
+          </div>
+          <div class="col-6">
+            <h3>Break interval</h3>
+            <div>
+              <label for="exampleInputEmail1">Minutes</label>
+              <input type="number" class="form-control" id="break-minutes" value="5">
+            </div>
+          </div>
+
+        </div>
+
+        
+
+
+      </main>
+
+
+
+      <footer class="mastfoot mt-auto">
+        <div class="inner">
+          <p>A companion for all of your work, by Ruben.</p>
+        </div>
+      </footer>
+    </div>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.6/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"></script>
+
+  </body>
+
+
+
+  <script>
+
+  const status = {
+      NOT_STARTED: 'Not started',
+      GRIND: 'Grind mode',
+      BREAK: 'Break mode',
+      PAUSED: 'Paused'
+  }
+
+  const API_ENDPOINT = "https://meme-api.herokuapp.com/gimme";
+
+  var MEME_CHANNEL = "/mcat";
+
+
+  var STUDY_INTERVAL = 55;
+  var BREAK_INTERVAL = 5;
+
+  var countDownDate;
+
+
+  var current_status = status.NOT_STARTED;
+
+
+
+function get_time_string(hours, minutes, seconds){
+
+  var time;
+
+  if(hours == 0){
+     time = minutes + "m " + seconds + "s ";
+  }
+  else if (hours + minutes == 0) {
+    time = seconds + "s ";
+  }
+  else {
+    time = "0s";
+  }
+  return time;
+
+}
+
+function set_timer(interval){
+    var now = new Date().getTime();
+
+    countDownDate = new Date(now + interval*60000).getTime();
+
+
+    // Update the count down every 1 second
+    var x = setInterval(function() {
+     now = new Date().getTime();
+
+    var distance = countDownDate - now;
+
+    var hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+    document.getElementById("timer").innerHTML = get_time_string(hours, minutes, seconds);
+
+    if (distance <= 0) {
+      clearInterval(x);
+
+      current_status = status.BREAK;  
+    }
+
+    else if(current_status == status.PAUSED) {
+      clearInterval(x);
+    } 
+
+    }, 1000);
+
+}
+
+function fetch_image() {
+  var url = API_ENDPOINT + MEME_CHANNEL;
+  
+  var request = new XMLHttpRequest()
+
+  request.open('GET', url, true)
+
+    request.onload = function () {
+      var data = JSON.parse(this.response);
+
+      if (request.status >= 200 && request.status < 400) {
+          console.log(data.url);
+
+          document.getElementById("title").innerText = data.title;
+          document.getElementById("meme").src = data.url;
+
+      } 
+      else {
+          console.log("Error, status: " + request.status);
+      }
+    }
+
+  request.send();
+
+  // {"postLink":"https://redd.it/i5q469","subreddit":"Mcat","title":"TFW you read the first sentence to every AAMC answer explanation.","url":"https://i.redd.it/q2gepfkchof51.png","nsfw":false,"spoiler":false}
+}
+
+fetch_image();
+
+
+
+function update() {
+
+    if(current_status == status.GRIND) {
+      current_status = status.PAUSED;
+      return;
+    }
+
+    if(current_status == status.PAUSED) current_status = status.GRIND;
+
+    if(current_status == status.NOT_STARTED) {
+      STUDY_INTERVAL = document.getElementById('study-minutes').value;  
+      BREAK_INTERVAL = document.getElementById('break-minutes').value;  
+
+      document.getElementById("status").innerText = "Grind mode";
+      document.getElementById("msg").innerText = "Continue studying for a break.";
+      document.getElementById("btn").innerText = "PAUSE";
+      document.getElementById("options").style.visibility = "hidden";
+
+
+      set_timer(STUDY_INTERVAL);
+
+      current_status = status.GRIND;
+    }
+
+
+
+
+}
+
+
+
+
+
+
+
+  </script>
+</html>
